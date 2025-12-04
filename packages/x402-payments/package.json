@@ -1,0 +1,37 @@
+{
+  "name": "@velvet/x402-payments",
+  "version": "0.1.0",
+  "description": "Velvet Sentinel - x402 Payment Integration with Thirdweb",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "biome lint ./src",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@velvet/shared-types": "workspace:*",
+    "x402": "^0.7.3",
+    "x402-hono": "^0.7.3",
+    "thirdweb": "^5.115.0",
+    "viem": "^2.41.2",
+    "hono": "^4.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "rimraf": "^6.0.1"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "license": "MIT"
+}

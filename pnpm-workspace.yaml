@@ -1,0 +1,12 @@
+packages:
+  - packages/*
+  - agents/*
+  - dashboard
+  - contracts
+
+ignoredBuiltDependencies:
+  - bufferutil
+  - esbuild
+  - keccak
+  - sharp
+  - utf-8-validate

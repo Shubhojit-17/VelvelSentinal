@@ -1,0 +1,160 @@
+{
+  "name": "velvet-sentinel-agent",
+  "version": "1.0.0",
+  "description": "AI security monitoring agent for DeFi protocols - detects threats, validates transactions, and coordinates responses",
+  "author": "Velvet Sentinel Team",
+  "license": "MIT",
+  
+  "runtime": {
+    "type": "node",
+    "version": ">=20.0.0",
+    "entrypoint": "dist/index.js"
+  },
+
+  "capabilities": [
+    "threat_detection",
+    "transaction_validation",
+    "risk_assessment",
+    "protocol_monitoring",
+    "anomaly_detection",
+    "tee_attestation"
+  ],
+
+  "tools": [
+    {
+      "name": "analyze_transaction",
+      "description": "Analyze a transaction for potential security risks",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "txHash": {
+            "type": "string",
+            "description": "Transaction hash to analyze"
+          },
+          "chainId": {
+            "type": "number",
+            "description": "Chain ID where transaction occurred"
+          }
+        },
+        "required": ["txHash", "chainId"]
+      }
+    },
+    {
+      "name": "detect_threats",
+      "description": "Run threat detection on a protocol or contract",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "targetAddress": {
+            "type": "string",
+            "description": "Contract or protocol address to monitor"
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Protocol name (uniswap, aave, etc.)"
+          },
+          "timeWindow": {
+            "type": "number",
+            "description": "Time window in seconds to analyze"
+          }
+        },
+        "required": ["targetAddress"]
+      }
+    },
+    {
+      "name": "get_risk_score",
+      "description": "Get risk score for an address or transaction",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Address to check"
+          },
+          "includeHistory": {
+            "type": "boolean",
+            "description": "Include historical analysis"
+          }
+        },
+        "required": ["address"]
+      }
+    },
+    {
+      "name": "monitor_protocol",
+      "description": "Start monitoring a DeFi protocol",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "protocol": {
+            "type": "string",
+            "description": "Protocol identifier"
+          },
+          "contracts": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Contract addresses to monitor"
+          },
+          "alertThreshold": {
+            "type": "number",
+            "description": "Risk threshold for alerts (0-100)"
+          }
+        },
+        "required": ["protocol", "contracts"]
+      }
+    },
+    {
+      "name": "get_attestation",
+      "description": "Get TEE attestation for agent verification",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "includeRTMRs": {
+            "type": "boolean",
+            "description": "Include RTMR values in attestation"
+          }
+        }
+      }
+    }
+  ],
+
+  "resources": [
+    {
+      "name": "threat_database",
+      "type": "knowledge_base",
+      "description": "Known threat patterns and malicious addresses"
+    },
+    {
+      "name": "protocol_abis",
+      "type": "data",
+      "description": "ABI definitions for monitored protocols"
+    }
+  ],
+
+  "integrations": {
+    "cortensor": {
+      "enabled": true,
+      "endpoint": "http://localhost:5010",
+      "models": ["mistral", "llama3"]
+    },
+    "phala": {
+      "enabled": true,
+      "tee_required": true
+    },
+    "x402": {
+      "enabled": true,
+      "payment_required": false
+    }
+  },
+
+  "permissions": {
+    "network": ["read"],
+    "blockchain": ["read", "simulate"],
+    "storage": ["read", "write"]
+  },
+
+  "syndicate": {
+    "eligible": true,
+    "minReputation": 300,
+    "defaultVotingPower": 100
+  }
+}

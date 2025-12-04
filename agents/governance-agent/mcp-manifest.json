@@ -1,0 +1,206 @@
+{
+  "name": "velvet-governance-agent",
+  "version": "1.0.0",
+  "description": "AI-powered governance participation agent for DeFi protocol voting and proposal analysis",
+  "author": "Velvet Sentinel Team",
+  "license": "MIT",
+  
+  "runtime": {
+    "type": "node",
+    "version": ">=20.0.0",
+    "entrypoint": "dist/index.js"
+  },
+
+  "capabilities": [
+    "proposal_analysis",
+    "voting_execution",
+    "governance_monitoring",
+    "delegation_management",
+    "impact_assessment",
+    "tee_attestation"
+  ],
+
+  "tools": [
+    {
+      "name": "analyze_proposal",
+      "description": "Analyze a governance proposal for risks and benefits",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "proposalId": {
+            "type": "string",
+            "description": "Proposal identifier"
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Protocol name (aave, compound, etc.)"
+          },
+          "depth": {
+            "type": "string",
+            "enum": ["quick", "standard", "deep"],
+            "description": "Analysis depth level"
+          }
+        },
+        "required": ["proposalId", "protocol"]
+      }
+    },
+    {
+      "name": "vote",
+      "description": "Cast a vote on a governance proposal",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "proposalId": {
+            "type": "string",
+            "description": "Proposal to vote on"
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Protocol name"
+          },
+          "vote": {
+            "type": "string",
+            "enum": ["for", "against", "abstain"],
+            "description": "Vote direction"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Optional reason for vote"
+          }
+        },
+        "required": ["proposalId", "protocol", "vote"]
+      }
+    },
+    {
+      "name": "list_proposals",
+      "description": "List active governance proposals",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "protocols": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Protocols to check"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "pending", "executed", "all"],
+            "description": "Proposal status filter"
+          }
+        }
+      }
+    },
+    {
+      "name": "delegate",
+      "description": "Delegate voting power to another address",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "protocol": {
+            "type": "string",
+            "description": "Protocol to delegate in"
+          },
+          "delegatee": {
+            "type": "string",
+            "description": "Address to delegate to"
+          },
+          "token": {
+            "type": "string",
+            "description": "Governance token address"
+          }
+        },
+        "required": ["protocol", "delegatee", "token"]
+      }
+    },
+    {
+      "name": "assess_impact",
+      "description": "Assess the potential impact of a proposal",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "proposalId": {
+            "type": "string",
+            "description": "Proposal to assess"
+          },
+          "protocol": {
+            "type": "string",
+            "description": "Protocol name"
+          },
+          "metrics": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Metrics to analyze (tvl, apr, risk, etc.)"
+          }
+        },
+        "required": ["proposalId", "protocol"]
+      }
+    },
+    {
+      "name": "get_voting_history",
+      "description": "Get agent's governance voting history",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "protocol": {
+            "type": "string",
+            "description": "Filter by protocol (optional)"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Number of votes to return"
+          }
+        }
+      }
+    }
+  ],
+
+  "resources": [
+    {
+      "name": "governance_data",
+      "type": "knowledge_base",
+      "description": "Protocol governance structures and rules"
+    },
+    {
+      "name": "proposal_history",
+      "type": "data",
+      "description": "Historical proposal data and outcomes"
+    }
+  ],
+
+  "integrations": {
+    "cortensor": {
+      "enabled": true,
+      "endpoint": "http://localhost:5010",
+      "models": ["llama3", "mistral"]
+    },
+    "phala": {
+      "enabled": true,
+      "tee_required": true
+    },
+    "x402": {
+      "enabled": true,
+      "payment_required": false
+    },
+    "snapshot": {
+      "enabled": true,
+      "hub_url": "https://hub.snapshot.org"
+    },
+    "tally": {
+      "enabled": true,
+      "api_url": "https://api.tally.xyz"
+    }
+  },
+
+  "permissions": {
+    "network": ["read"],
+    "blockchain": ["read", "write", "sign"],
+    "storage": ["read", "write"]
+  },
+
+  "syndicate": {
+    "eligible": true,
+    "minReputation": 500,
+    "defaultVotingPower": 200,
+    "governanceWeight": 2.0
+  }
+}

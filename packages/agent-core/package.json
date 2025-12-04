@@ -1,0 +1,37 @@
+{
+  "name": "@velvet/agent-core",
+  "version": "0.1.0",
+  "description": "Velvet Sentinel - Core Agent Framework",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "biome lint ./src",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@velvet/shared-types": "workspace:*",
+    "@velvet/phala-enclave": "workspace:*",
+    "@velvet/cortensor-client": "workspace:*",
+    "@velvet/x402-payments": "workspace:*",
+    "viem": "^2.41.2",
+    "hono": "^4.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "rimraf": "^6.0.1"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "license": "MIT"
+}

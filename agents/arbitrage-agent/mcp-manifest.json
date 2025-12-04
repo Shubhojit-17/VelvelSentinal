@@ -1,0 +1,191 @@
+{
+  "name": "velvet-arbitrage-agent",
+  "version": "1.0.0",
+  "description": "AI-powered arbitrage detection and execution agent for cross-DEX opportunities",
+  "author": "Velvet Sentinel Team",
+  "license": "MIT",
+  
+  "runtime": {
+    "type": "node",
+    "version": ">=20.0.0",
+    "entrypoint": "dist/index.js"
+  },
+
+  "capabilities": [
+    "arbitrage_detection",
+    "price_analysis",
+    "trade_execution",
+    "route_optimization",
+    "profit_calculation",
+    "tee_attestation"
+  ],
+
+  "tools": [
+    {
+      "name": "find_opportunities",
+      "description": "Scan for arbitrage opportunities across DEXes",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "tokenPairs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tokenA": { "type": "string" },
+                "tokenB": { "type": "string" }
+              }
+            },
+            "description": "Token pairs to analyze"
+          },
+          "dexes": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "DEXes to include (uniswap, sushiswap, etc.)"
+          },
+          "minProfitBps": {
+            "type": "number",
+            "description": "Minimum profit in basis points"
+          },
+          "maxSlippageBps": {
+            "type": "number",
+            "description": "Maximum allowed slippage"
+          }
+        },
+        "required": ["tokenPairs"]
+      }
+    },
+    {
+      "name": "analyze_route",
+      "description": "Analyze a specific arbitrage route",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "route": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dex": { "type": "string" },
+                "tokenIn": { "type": "string" },
+                "tokenOut": { "type": "string" },
+                "pool": { "type": "string" }
+              }
+            },
+            "description": "Sequence of swaps in the route"
+          },
+          "inputAmount": {
+            "type": "string",
+            "description": "Amount to trade (in wei)"
+          }
+        },
+        "required": ["route", "inputAmount"]
+      }
+    },
+    {
+      "name": "execute_trade",
+      "description": "Execute an arbitrage trade",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "opportunityId": {
+            "type": "string",
+            "description": "ID of the opportunity to execute"
+          },
+          "maxGasPrice": {
+            "type": "string",
+            "description": "Maximum gas price in gwei"
+          },
+          "simulate": {
+            "type": "boolean",
+            "description": "If true, only simulate without executing"
+          }
+        },
+        "required": ["opportunityId"]
+      }
+    },
+    {
+      "name": "get_price",
+      "description": "Get current price for a token pair across DEXes",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "tokenA": {
+            "type": "string",
+            "description": "First token address"
+          },
+          "tokenB": {
+            "type": "string",
+            "description": "Second token address"
+          },
+          "dex": {
+            "type": "string",
+            "description": "Specific DEX (optional, returns all if not specified)"
+          }
+        },
+        "required": ["tokenA", "tokenB"]
+      }
+    },
+    {
+      "name": "get_performance",
+      "description": "Get agent's trading performance metrics",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "enum": ["day", "week", "month"],
+            "description": "Performance period"
+          },
+          "includeProof": {
+            "type": "boolean",
+            "description": "Include ZK proof of performance"
+          }
+        }
+      }
+    }
+  ],
+
+  "resources": [
+    {
+      "name": "price_feeds",
+      "type": "data",
+      "description": "Real-time price data from DEXes"
+    },
+    {
+      "name": "liquidity_data",
+      "type": "data",
+      "description": "Pool liquidity information"
+    }
+  ],
+
+  "integrations": {
+    "cortensor": {
+      "enabled": true,
+      "endpoint": "http://localhost:5010",
+      "models": ["mistral"]
+    },
+    "phala": {
+      "enabled": true,
+      "tee_required": true
+    },
+    "x402": {
+      "enabled": true,
+      "payment_required": true,
+      "cost_per_execution": "0.001"
+    }
+  },
+
+  "permissions": {
+    "network": ["read"],
+    "blockchain": ["read", "write", "sign"],
+    "storage": ["read", "write"]
+  },
+
+  "syndicate": {
+    "eligible": true,
+    "minReputation": 400,
+    "defaultVotingPower": 150,
+    "profitShareBps": 1000
+  }
+}

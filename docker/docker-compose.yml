@@ -1,0 +1,186 @@
+version: '3.8'
+
+services:
+  # Redis for caching and pub/sub
+  redis:
+    image: redis:7-alpine
+    container_name: velvet-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Cortensor Node (local development)
+  cortensor-node:
+    image: cortensor/node:latest
+    container_name: velvet-cortensor
+    ports:
+      - "5010:5010"
+    environment:
+      - CORTENSOR_MODE=development
+      - CORTENSOR_API_KEY=${CORTENSOR_API_KEY:-default-dev-token}
+    volumes:
+      - cortensor-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5010/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Sentinel Agent - Security monitoring
+  sentinel-agent:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.agent
+      args:
+        - AGENT_TYPE=sentinel
+    container_name: velvet-sentinel
+    environment:
+      - AGENT_ID=sentinel-001
+      - AGENT_NAME=Sentinel Security Agent
+      - AGENT_TYPE=sentinel
+      - PORT=3001
+      - DSTACK_ENDPOINT=${DSTACK_ENDPOINT:-http://localhost:8090}
+      - CORTENSOR_ENDPOINT=${CORTENSOR_ENDPOINT:-http://cortensor-node:5010}
+      - CORTENSOR_API_KEY=${CORTENSOR_API_KEY:-default-dev-token}
+      - THIRDWEB_CLIENT_ID=${THIRDWEB_CLIENT_ID}
+      - THIRDWEB_SECRET_KEY=${THIRDWEB_SECRET_KEY}
+      - INFURA_API_KEY=${INFURA_API_KEY}
+      - NETWORK=base-sepolia
+      - SECRET_SALT=${SECRET_SALT:-velvet-sentinel-secret}
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=info
+    ports:
+      - "3001:3001"
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - agent-data:/app/data
+    command: ["node", "agents/sentinel-agent/dist/index.js"]
+    restart: unless-stopped
+
+  # Arbitrage Agent - DeFi trading
+  arbitrage-agent:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.agent
+      args:
+        - AGENT_TYPE=arbitrage
+    container_name: velvet-arbitrage
+    environment:
+      - AGENT_ID=arbitrage-001
+      - AGENT_NAME=Arbitrage Trading Agent
+      - AGENT_TYPE=arbitrage
+      - PORT=3002
+      - DSTACK_ENDPOINT=${DSTACK_ENDPOINT:-http://localhost:8090}
+      - CORTENSOR_ENDPOINT=${CORTENSOR_ENDPOINT:-http://cortensor-node:5010}
+      - CORTENSOR_API_KEY=${CORTENSOR_API_KEY:-default-dev-token}
+      - THIRDWEB_CLIENT_ID=${THIRDWEB_CLIENT_ID}
+      - THIRDWEB_SECRET_KEY=${THIRDWEB_SECRET_KEY}
+      - INFURA_API_KEY=${INFURA_API_KEY}
+      - NETWORK=base-sepolia
+      - SECRET_SALT=${SECRET_SALT:-velvet-sentinel-secret}
+      - REDIS_URL=redis://redis:6379
+      - MIN_PROFIT_BPS=30
+      - MAX_SLIPPAGE_BPS=100
+      - SUPPORTED_DEXS=uniswap,sushiswap,curve,balancer
+      - LOG_LEVEL=info
+    ports:
+      - "3002:3002"
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - agent-data:/app/data
+    command: ["node", "agents/arbitrage-agent/dist/index.js"]
+    restart: unless-stopped
+
+  # Governance Agent - DAO voting
+  governance-agent:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.agent
+      args:
+        - AGENT_TYPE=governance
+    container_name: velvet-governance
+    environment:
+      - AGENT_ID=governance-001
+      - AGENT_NAME=Governance Analysis Agent
+      - AGENT_TYPE=governance
+      - PORT=3003
+      - DSTACK_ENDPOINT=${DSTACK_ENDPOINT:-http://localhost:8090}
+      - CORTENSOR_ENDPOINT=${CORTENSOR_ENDPOINT:-http://cortensor-node:5010}
+      - CORTENSOR_API_KEY=${CORTENSOR_API_KEY:-default-dev-token}
+      - THIRDWEB_CLIENT_ID=${THIRDWEB_CLIENT_ID}
+      - THIRDWEB_SECRET_KEY=${THIRDWEB_SECRET_KEY}
+      - INFURA_API_KEY=${INFURA_API_KEY}
+      - NETWORK=base-sepolia
+      - SECRET_SALT=${SECRET_SALT:-velvet-sentinel-secret}
+      - REDIS_URL=redis://redis:6379
+      - SNAPSHOT_HUB_URL=https://hub.snapshot.org
+      - TALLY_API_URL=https://api.tally.xyz
+      - LOG_LEVEL=info
+    ports:
+      - "3003:3003"
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - agent-data:/app/data
+    command: ["node", "agents/governance-agent/dist/index.js"]
+    restart: unless-stopped
+
+  # Dashboard
+  dashboard:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dashboard
+    container_name: velvet-dashboard
+    environment:
+      - NEXT_PUBLIC_THIRDWEB_CLIENT_ID=${THIRDWEB_CLIENT_ID}
+      - NEXT_PUBLIC_SENTINEL_URL=http://localhost:3001
+      - NEXT_PUBLIC_ARBITRAGE_URL=http://localhost:3002
+      - NEXT_PUBLIC_GOVERNANCE_URL=http://localhost:3003
+      - NEXT_PUBLIC_NETWORK=base-sepolia
+    ports:
+      - "3000:3000"
+    depends_on:
+      - sentinel-agent
+      - arbitrage-agent
+      - governance-agent
+    restart: unless-stopped
+
+  # API Gateway (for production)
+  api-gateway:
+    image: nginx:alpine
+    container_name: velvet-gateway
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - dashboard
+      - sentinel-agent
+      - arbitrage-agent
+      - governance-agent
+    restart: unless-stopped
+    profiles:
+      - production
+
+volumes:
+  redis-data:
+  cortensor-data:
+  agent-data:
+
+networks:
+  default:
+    name: velvet-network
