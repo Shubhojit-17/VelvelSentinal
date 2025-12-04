@@ -461,3 +461,12 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
     has_more: boolean;
   };
 }
+
+// ============================================
+// Re-export Infrastructure Modules
+// ============================================
+
+export * from './cache.js';
+export * from './database.js';
+export * from './websocket.js';
+export * from './psy-connector.js';
